@@ -1,5 +1,5 @@
+// components/ui/card.tsx
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
 function Card({
@@ -69,22 +69,37 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+function CardContent({ 
+  className, 
+  noPadding, // Naya prop
+  ...props 
+}: React.ComponentProps<"div"> & { noPadding?: boolean }) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-4 group-data-[size=sm]/card:px-3", className)}
+      className={cn(
+        "px-4 group-data-[size=sm]/card:px-3",
+        noPadding && "p-0", // Agar noPadding true ho to padding hata do
+        className
+      )}
       {...props}
     />
   )
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+function CardFooter({ 
+  className, 
+  plain, // Naya prop image jaisa look dene ke liye
+  ...props 
+}: React.ComponentProps<"div"> & { plain?: boolean }) {
   return (
     <div
       data-slot="card-footer"
       className={cn(
+        // Default Shadcn style: grayish background aur padding
         "flex items-center rounded-b-xl border-t bg-muted/50 p-4 group-data-[size=sm]/card:p-3",
+        // Image wala plain style override:
+        plain && "bg-transparent border-none px-6 pb-6 pt-2",
         className
       )}
       {...props}

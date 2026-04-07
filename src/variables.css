@@ -1,0 +1,36 @@
+@theme {
+  /* text colors */
+  --color-primary-500: oklch(52.5% 0.223 3.958);
+  --color-secondary-500: oklch(0% 0 0);
+
+  /* background colors */
+  --color-bground-500: oklch(97.1% 0.014 343.198);
+  --color-secondary-500: oklch(0% 0 0);
+  
+  /* button colors */
+  --color-button-500: ooklch(57.7% 0.245 27.325);
+  --color-bgbtn-500: oklch(64.8% 0.2 131.684);
+  --color-hoverbtn-500: oklch(52.5% 0.223 3.958);
+
+  /* badge colors */
+  --color-badge-500: oklch(43.2% 0.232 292.759);
+  --color-bgbadge-500: oklch(51.4% 0.222 16.935);
+  --color-hoverbadge-500: oklch(38.6% 0.063 188.416);
+
+  /* sonner colors  */
+  --color-sonner-500: oklch(98.8% 0.003 106.5);
+  --color-bgsonner-500: oklch(14.5% 0.008 326);
+
+  /* sheet color  */
+  --color-sheet-500: oklch(38% 0.189 293.745);
+  --color-bgsheet-500: oklch(76.8% 0.233 130.85);
+
+  /* toggle color  */
+  --color-toggle-500: oklch(15.3% 0.006 107.1);
+  --color-bgtoggle-500: oklch(49.1% 0.27 292.581);
+  --color-hovertoggle-500: oklch(38.6% 0.063 188.416);
+  
+ /* dialog color */
+ --color-dialog-500: oklch(52.5% 0.223 3.958);
+  --color-bgdialog-500: oklch(0% 0 0);
+}

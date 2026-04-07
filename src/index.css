@@ -1,3 +1,4 @@
+@import "./variables.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -5,14 +6,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --color-primary-500: oklch(97.1% 0.014 343.198);
-  --color-secondary-500: oklch(0% 0 0);
 
-  /* background colors */
-  --bg-primary-500: oklch(97.1% 0.014 343.198);
-  --bg-secondary-500: oklch(0% 0 0);
-}
 
 @theme inline {
   --font-heading: var(--font-sans);

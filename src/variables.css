@@ -5,10 +5,9 @@
 
   /* background colors */
   --color-bground-500: oklch(97.1% 0.014 343.198);
-  --color-secondary-500: oklch(0% 0 0);
   
   /* button colors */
-  --color-button-500: ooklch(57.7% 0.245 27.325);
+  --color-button-500: oklch(57.7% 0.245 27.325);
   --color-bgbtn-500: oklch(64.8% 0.2 131.684);
   --color-hoverbtn-500: oklch(52.5% 0.223 3.958);
 

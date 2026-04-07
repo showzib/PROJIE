@@ -1,45 +1,38 @@
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  CardAction,
-} from "@/components/ui/card";
-import { DarkModeToggle } from "@/components/ui/toggle"; 
-import { Badge } from "./components/ui/badge";
+import * as React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-function App() {
+// Layout
+import MainLayout from "./layout/Mainlayout";
+
+// Pages
+import TenantsPage from "./pages/public/tenants";
+import { MyProject } from "./pages/private/MyProject";
+
+export default function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-10 gap-6">
-      {/* Dark Mode Toggle at top-right or center */}
-      <div className="self-end bg-bgtoggle-500 text-toggle-500 rounded-full hover:bg-hovertoggle-500">
-        <DarkModeToggle />
-        
-      </div>
-        <Badge/>
+    <Router>
+      <Routes>
+        {/* Redirect root URL to /tenants */}
+        <Route path="/" element={<Navigate to="/tenants" replace />} />
 
-      <Card className="w-80">
-        <CardHeader>
-          <CardTitle>ShadCN Card</CardTitle>
-          <CardDescription>
-            Card Description
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          Card Content
-        </CardContent>
-        <CardFooter>
-          <CardAction>
-            <button className="px-4 py-2 bg-bgbtn-500  rounded hover:bg-hoverbtn-500">
-              Click Me
-            </button>
-          </CardAction>
-        </CardFooter>
-      </Card>
-    </div>
+        {/* Tenants page rendered independently */}
+        <Route path="/tenants" element={<TenantsPage />} />
+
+        {/* Layout wrapper for other pages */}
+        <Route path="/" element={<MainLayout />}>
+          <Route path="my-project" element={<MyProject />} />
+          
+          {/* Catch-all */}
+          <Route
+            path="*"
+            element={
+              <div className="p-6 text-center text-red-500 font-bold">
+                Page Not Found
+              </div>
+            }
+          />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
-
-export default App;

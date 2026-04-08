@@ -9,7 +9,7 @@ export function DarkModeToggle({ className }: { className?: string }) {
     <button
       onClick={toggleTheme}
       className={cn(
-        "inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800",
+        "inline-flex items-center justify-center rounded-md p-1.5 transition-colors dark:text-foreground hover:bg-slate-100 dark:hover:bg-slate-400",
         className
       )}
     >

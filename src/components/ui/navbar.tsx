@@ -14,11 +14,13 @@ export function Navbar() {
     <header className="flex h-16 w-full items-center justify-between border-b bg-nav-500 px-8 shadow-sm">
       
       {/* LEFT: Logo Section */}
-      <div className="flex items-center gap-1 text-2xl font-bold tracking-tighter">
-        <span className="text-[#1e2a5a]">PR</span>
-        <Globe className="size-6 text-[#f5a623]" fill="#f5a623" />
-        <span className="text-[#1e2a5a]">JEi</span>
-      </div>
+    <div className="flex items-center gap-1 text-2xl font-bold tracking-tighter">
+  <img 
+    src="/src/assets/projielogonew.png" 
+    alt="Projei Logo" 
+    className="h-8 w-auto object-contain"
+  />
+</div>
 
       {/* CENTER: Navigation Links */}
       <NavigationMenu>

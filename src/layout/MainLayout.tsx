@@ -1,4 +1,5 @@
 import { Outlet, useNavigate } from "react-router-dom";
+import { Toaster } from "sonner";
 import {
   SidebarProvider,
   Sidebar,
@@ -9,6 +10,7 @@ import {
   SidebarInset,
   SidebarTrigger,
   useSidebar,
+  SidebarFooter, // Add this import
 } from "@/components/ui/sidebar";
 
 import { NavSearch, NavUser } from "@/components/ui/navbar-content";
@@ -22,6 +24,7 @@ import {
 // Import logos
 import smallLogo from "@/assets/sidemenulogo.png";
 import fullLogo from "@/assets/projielogonew.png";
+import frameLogo from "@/assets/frame.png"; // Import frame logo
 
 // Logo component
 function ProjectLogo() {
@@ -47,6 +50,50 @@ function ProjectLogo() {
   );
 }
 
+// Footer Logo Component
+function FooterLogo() {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
+  return (
+    <div className="border-t mt-auto">
+      {isCollapsed ? (
+        // Collapsed mode - sirf logo
+        <div className="flex justify-center py-4">
+          <img 
+            src={frameLogo}
+            alt="Frame Logo" 
+            className="w-6 h-6 object-contain "
+          />
+        </div>
+      ) : (
+        // Expanded mode - logo + powered by
+        <div className="p-4 space-y-2">
+          <div className="flex justify-center">
+            <img 
+              src={frameLogo}
+              alt="Frame Logo" 
+              className="h-10 w-auto object-contain "
+            />
+          </div>
+          
+          <div className="text-center text-xs text-muted-foreground">
+            <span className="text-secondary-500 dark:text-primary-500">Powered by </span>
+            <a 
+              href="https://www.neksoft.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-primary text-blue-500 transition-colors underline-offset-2 hover:underline"
+            >
+              www.neksoft.com
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MainLayout() {
   const navigate = useNavigate();
 
@@ -61,7 +108,7 @@ export default function MainLayout() {
     <SidebarProvider defaultOpen={true}>
       <div className="flex w-full min-h-screen">
         
-        <Sidebar collapsible="icon">
+        <Sidebar collapsible="icon" className="flex flex-col">
           <SidebarContent>
             <ProjectLogo />
             
@@ -78,10 +125,15 @@ export default function MainLayout() {
               ))}
             </SidebarMenu>
           </SidebarContent>
+          
+          {/* Footer Logo - Sidebar ke bottom mein */}
+          <SidebarFooter>
+            <FooterLogo />
+          </SidebarFooter>
         </Sidebar>
 
         <SidebarInset>
-          <header className="flex h-14 items-center justify-between px-4 border-b bg-white sticky top-0 z-10 gap-4">
+          <header className="flex h-14 items-center justify-between px-4 border-b bg-white dark:bg-sidebar sticky top-0 z-10 gap-4">
             <div className="flex items-center gap-4 flex-1">
               <SidebarTrigger />
               <NavSearch />
@@ -95,6 +147,24 @@ export default function MainLayout() {
           </main>
         </SidebarInset>
       </div>
+      
+      {/* Sonner Toaster - Global Toast Notifications */}
+      <Toaster 
+        position="top-right"
+        richColors
+        closeButton
+        duration={3000}
+        expand={false}
+        visibleToasts={3}
+        toastOptions={{
+          style: {
+            background: 'var(--background)',
+            color: 'var(--foreground)',
+            border: '1px solid var(--border)',
+          },
+          className: 'my-toast',
+        }}
+      />
     </SidebarProvider>
   );
 }

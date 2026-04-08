@@ -10,21 +10,26 @@ import {
   SidebarInset,
   SidebarTrigger,
   useSidebar,
-  SidebarFooter, // Add this import
+  SidebarFooter,
 } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip"; // ✅ Add this import
 
 import { NavSearch, NavUser } from "@/components/ui/navbar-content";
 import { 
   FileText, 
   LayoutDashboard, 
   Activity, 
-  ClipboardList 
+  ClipboardList,
+  Users,
+  Building2,
+  UserCircle,
+  FileSearch,
 } from "lucide-react";
 
 // Import logos
 import smallLogo from "@/assets/sidemenulogo.png";
 import fullLogo from "@/assets/projielogonew.png";
-import frameLogo from "@/assets/frame.png"; // Import frame logo
+import frameLogo from "@/assets/frame.png";
 
 // Logo component
 function ProjectLogo() {
@@ -58,22 +63,20 @@ function FooterLogo() {
   return (
     <div className="border-t mt-auto">
       {isCollapsed ? (
-        // Collapsed mode - sirf logo
         <div className="flex justify-center py-4">
           <img 
             src={frameLogo}
             alt="Frame Logo" 
-            className="w-6 h-6 object-contain "
+            className="w-6 h-6 object-contain"
           />
         </div>
       ) : (
-        // Expanded mode - logo + powered by
         <div className="p-4 space-y-2">
           <div className="flex justify-center">
             <img 
               src={frameLogo}
               alt="Frame Logo" 
-              className="h-10 w-auto object-contain "
+              className="h-10 w-auto object-contain"
             />
           </div>
           
@@ -97,14 +100,24 @@ function FooterLogo() {
 export default function MainLayout() {
   const navigate = useNavigate();
 
-  const menuItems = [
+  // Main Menu Items
+  const mainMenuItems = [
     { path: "/my-project", label: "My Project", icon: FileText },
     { path: "/my-boards", label: "My Boards", icon: LayoutDashboard },
     { path: "/activities", label: "Activities", icon: Activity },
     { path: "/task-request", label: "Task Request", icon: ClipboardList },
   ];
 
+  // Management Menu Items
+  const managementMenuItems = [
+    { path: "/customer", label: "Customer", icon: UserCircle },
+    { path: "/companies", label: "Companies", icon: Building2 },
+    { path: "/team", label: "Team", icon: Users },
+    { path: "/dsm-logs", label: "DSM Logs", icon: FileSearch },
+  ];
+
   return (
+  <TooltipProvider>
     <SidebarProvider defaultOpen={true}>
       <div className="flex w-full min-h-screen">
         
@@ -113,10 +126,25 @@ export default function MainLayout() {
             <ProjectLogo />
             
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton 
                     onClick={() => navigate(item.path)}
+                    tooltip={item.label}
+                  >
+                    <item.icon className="size-4" />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+            
+            <SidebarMenu>
+              {managementMenuItems.map((item) => (
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton 
+                    onClick={() => navigate(item.path)}
+                    tooltip={item.label}
                   >
                     <item.icon className="size-4" />
                     <span>{item.label}</span>
@@ -126,7 +154,6 @@ export default function MainLayout() {
             </SidebarMenu>
           </SidebarContent>
           
-          {/* Footer Logo - Sidebar ke bottom mein */}
           <SidebarFooter>
             <FooterLogo />
           </SidebarFooter>
@@ -148,7 +175,6 @@ export default function MainLayout() {
         </SidebarInset>
       </div>
       
-      {/* Sonner Toaster - Global Toast Notifications */}
       <Toaster 
         position="top-right"
         richColors
@@ -166,5 +192,6 @@ export default function MainLayout() {
         }}
       />
     </SidebarProvider>
-  );
+  </TooltipProvider>
+);
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,10 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Folder } from "lucide-react";
 import { CardSmall } from "@/components/ui/myprojectcard";
-import { AddProjectModal } from "@/components/ui/AddProjectModal"; // Import the new component
+import { AddProjectModal } from "@/components/ui/AddProjectModal";
 
 interface Task {
   id: number;
@@ -25,7 +22,7 @@ interface Task {
   isStarred: boolean;
 }
 
-export default function TaskRequest() {
+export default function MyProject() {
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: 1,
@@ -50,17 +47,42 @@ export default function TaskRequest() {
     }
   ]);
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
+  
+  // Edit Modal States
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  
+  // Delete Modal States
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
 
   const handleEdit = (task: Task) => {
-    setSelectedTask(task);
+    setEditingTask(task);
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (taskId: number) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const handleSaveEdit = () => {
+    if (editingTask) {
+      setTasks(tasks.map(task => 
+        task.id === editingTask.id ? editingTask : task
+      ));
+      setIsEditModalOpen(false);
+      setEditingTask(null);
+    }
+  };
+
+  const handleDeleteClick = (taskId: number) => {
+    setDeletingTaskId(taskId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletingTaskId) {
+      setTasks(tasks.filter(task => task.id !== deletingTaskId));
+      setIsDeleteModalOpen(false);
+      setDeletingTaskId(null);
+    }
   };
 
   const handleStar = (taskId: number) => {
@@ -69,18 +91,7 @@ export default function TaskRequest() {
     ));
   };
 
-  const handleSaveEdit = () => {
-    if (selectedTask) {
-      setTasks(tasks.map(task => 
-        task.id === selectedTask.id ? selectedTask : task
-      ));
-      setIsEditModalOpen(false);
-      setSelectedTask(null);
-    }
-  };
-
   const handleProjectCreate = (newProject: any) => {
-    // Convert project to task format
     const newTask: Task = {
       id: tasks.length + 1,
       title: newProject.name,
@@ -89,15 +100,14 @@ export default function TaskRequest() {
       isStarred: false
     };
     setTasks([...tasks, newTask]);
-    console.log("New Project Created:", newProject);
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">My Project</h1>
-          <p className="text-muted-foreground">Your task requests will appear here.</p>
+          <p className="text-muted-foreground">Your projects will appear here.</p>
         </div>
         <Button onClick={() => setIsAddProjectModalOpen(true)}>
           <Folder className="mr-2 h-4 w-4" />
@@ -109,42 +119,50 @@ export default function TaskRequest() {
         {tasks.map((task) => (
           <CardSmall
             key={task.id}
+            id={task.id}
             title={task.title}
             description={task.description}
             date={task.date}
             isStarred={task.isStarred}
             onEdit={() => handleEdit(task)}
-            onDelete={() => handleDelete(task.id)}
+            onDelete={() => handleDeleteClick(task.id)}
             onStar={() => handleStar(task.id)}
           />
         ))}
       </div>
 
+      {/* Add Project Modal */}
+      <AddProjectModal
+        open={isAddProjectModalOpen}
+        onOpenChange={setIsAddProjectModalOpen}
+        onProjectCreate={handleProjectCreate}
+      />
+
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit Task</DialogTitle>
+            <DialogTitle>Edit Project</DialogTitle>
             <DialogDescription>
-              Make changes to your task here.
+              Make changes to your project here.
             </DialogDescription>
           </DialogHeader>
-          {selectedTask && (
+          {editingTask && (
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="edit-title">Title</Label>
                 <Input
                   id="edit-title"
-                  value={selectedTask.title}
-                  onChange={(e) => setSelectedTask({ ...selectedTask, title: e.target.value })}
+                  value={editingTask.title}
+                  onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-description">Description</Label>
-                <Textarea
+                <Input
                   id="edit-description"
-                  value={selectedTask.description}
-                  onChange={(e) => setSelectedTask({ ...selectedTask, description: e.target.value })}
+                  value={editingTask.description}
+                  onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
@@ -152,8 +170,8 @@ export default function TaskRequest() {
                 <Input
                   id="edit-date"
                   type="date"
-                  value={selectedTask.date}
-                  onChange={(e) => setSelectedTask({ ...selectedTask, date: e.target.value })}
+                  value={editingTask.date}
+                  onChange={(e) => setEditingTask({ ...editingTask, date: e.target.value })}
                 />
               </div>
             </div>
@@ -167,12 +185,25 @@ export default function TaskRequest() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Project Modal - Separate Component */}
-      <AddProjectModal
-        open={isAddProjectModalOpen}
-        onOpenChange={setIsAddProjectModalOpen}
-        onProjectCreate={handleProjectCreate}
-      />
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Project</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this project? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

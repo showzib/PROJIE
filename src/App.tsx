@@ -7,11 +7,11 @@ import MainLayout from "./layout/MainLayout";
 import TenantsPage from "./pages/public/tenants";
 
 // Private Pages (Existing)
-import MyProject from "./pages/private/MyProject";
+import MyProject from "./pages/private/My-Project/MyProject";
 import MyBoards from "./pages/private/MyBoards";
 import Activities from "./pages/private/Activities";
 import TaskRequest from "./pages/private/TaskRequest";
-import ProjectDetail from "./pages/private/ProjectDetail";
+import ProjectDetail from "./pages/private/My-Project/ProjectDetails/ProjectDetail";
 
 // New Pages - Customer, DSM Logs, Companies, Team
 import Customer from "./pages/private/Customer";

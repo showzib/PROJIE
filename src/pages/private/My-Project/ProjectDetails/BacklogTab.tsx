@@ -19,6 +19,7 @@ import { SprintTable } from "@/components/ui/SprintTable";
 import { BacklogTable } from "@/components/ui/BacklogTable";
 import { ItemActionModal } from "@/components/ui/ItemActionModal";
 import { FilterDialog } from "@/components/ui/backlogFilterDialog";
+import DevelopmentPage from "../../My-Project/ProjectDetails/developmentpage";
 
 // Initial Sprint Data
 const initialSprintData = [
@@ -146,7 +147,12 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-export default function BacklogTab({ projectId }: { projectId?: string }) {
+interface BacklogTabProps {
+  projectId?: string;
+  onOpenBoard?: () => void;
+}
+
+export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -154,6 +160,9 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"edit" | "send">("edit");
   const [currentItem, setCurrentItem] = useState<any>(null);
+  
+  // State to control which view to show
+  const [showDevelopment, setShowDevelopment] = useState(false);
   
   // Sprint data state
   const [sprintItems, setSprintItems] = useState(initialSprintData);
@@ -204,13 +213,22 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
   };
 
   const handleOpenBoard = () => {
-    console.log("Open board");
+    setShowDevelopment(true);
+  };
+
+  const handleBackToBacklog = () => {
+    setShowDevelopment(false);
   };
 
   const handleApplyFilters = () => {
     console.log("Filters applied");
     setFilterOpen(false);
   };
+
+  // If showDevelopment is true, show DevelopmentPage
+  if (showDevelopment) {
+    return <DevelopmentPage onBack={handleBackToBacklog} />;
+  }
 
   // Select/Deselect sprint items
   const handleSelectSprintItem = (id: number) => {
@@ -278,7 +296,6 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
     <div className="space-y-3">
       {filteredSprint.map((item) => (
         <div key={item.id} className="rounded-lg border bg-card p-4 space-y-3">
-          {/* Header with checkbox */}
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-2 flex-1">
               <input
@@ -304,7 +321,6 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
             </div>
           </div>
 
-          {/* Details Grid */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <p className="text-muted-foreground text-xs">Issue Type</p>
@@ -368,7 +384,6 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
             </div>
           </div>
 
-          {/* Action buttons for mobile */}
           <div className="flex gap-2 pt-2 border-t">
             <Button 
               variant="outline" 
@@ -408,7 +423,6 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
       ) : (
         backlogItems.map((item, index) => (
           <div key={item.id} className="rounded-lg border bg-card p-4 space-y-3">
-            {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-2 flex-1">
                 <div className="flex-1">
@@ -428,7 +442,6 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
               </div>
             </div>
 
-            {/* Details Grid */}
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <p className="text-muted-foreground text-xs">Issue Type</p>
@@ -485,7 +498,7 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
 
   return (
     <div className="space-y-4 px-2 sm:px-4">
-      {/* Header with Search and Filter Button - Responsive */}
+      {/* Header with Search and Filter Button */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -526,7 +539,7 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
         </div>
       </div>
 
-      {/* Active Filters Display - Responsive */}
+      {/* Active Filters Display */}
       <ActiveFilters
         activeFiltersCount={activeFiltersCount}
         selectedStatus={selectedStatus}
@@ -536,33 +549,37 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
         onClearFilters={clearFilters}
       />
 
-      {/* Sprint Section - Responsive */}
+      {/* Sprint Section - With overflow-x-auto to fix side scroll */}
       <div className="space-y-3">
         <SprintHeader taskCount={filteredSprint.length} />
         
         {isMobile ? (
           <MobileSprintCardView />
         ) : (
-          <SprintTable
-            items={filteredSprint}
-            selectedItems={selectedSprintItems}
-            onSelectItem={handleSelectSprintItem}
-            onSelectAll={handleSelectAllSprint}
-            updateIssueType={updateIssueType}
-            editingCell={editingCell}
-            editValue={editValue}
-            setEditValue={setEditValue}
-            onStartEdit={startEditing}
-            onSaveEdit={saveEdit}
-            onCancelEdit={cancelEdit}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-            onSendToBacklog={handleSendToBacklog}
-          />
+          <div className="w-full overflow-x-auto rounded-lg border">
+            <div className="min-w-[800px] lg:min-w-0">
+              <SprintTable
+                items={filteredSprint}
+                selectedItems={selectedSprintItems}
+                onSelectItem={handleSelectSprintItem}
+                onSelectAll={handleSelectAllSprint}
+                updateIssueType={updateIssueType}
+                editingCell={editingCell}
+                editValue={editValue}
+                setEditValue={setEditValue}
+                onStartEdit={startEditing}
+                onSaveEdit={saveEdit}
+                onCancelEdit={cancelEdit}
+                onEditItem={handleEditItem}
+                onDeleteItem={handleDeleteItem}
+                onSendToBacklog={handleSendToBacklog}
+              />
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Backlog Section - Responsive */}
+      {/* Backlog Section - With overflow-x-auto to fix side scroll */}
       <div className="space-y-3">
         <div className="rounded-lg border bg-card p-3 sm:p-4">
           <div className="flex items-center justify-between">
@@ -581,11 +598,15 @@ export default function BacklogTab({ projectId }: { projectId?: string }) {
         {isMobile ? (
           <MobileBacklogCardView />
         ) : (
-          <BacklogTable
-            items={backlogItems}
-            onDelete={handleDeleteFromBacklog}
-            onSendToSprint={handleSendToSprint}
-          />
+          <div className="w-full overflow-x-auto rounded-lg border">
+            <div className="min-w-[800px] lg:min-w-0">
+              <BacklogTable
+                items={backlogItems}
+                onDelete={handleDeleteFromBacklog}
+                onSendToSprint={handleSendToSprint}
+              />
+            </div>
+          </div>
         )}
       </div>
 

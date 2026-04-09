@@ -80,12 +80,11 @@ function FooterLogo() {
   );
 }
 
-// Menu Items Component - Sab ek hi list mein
+// Menu Items Component
 function MenuItems() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Sabhi menu items ek saath
   const menuItems = [
     { path: "/my-project", label: "My Project", icon: FileText },
     { path: "/my-boards", label: "My Boards", icon: LayoutDashboard },
@@ -109,7 +108,7 @@ function MenuItems() {
               onClick={() => navigate(item.path)}
               tooltip={item.label}
               className={cn(
-                "transition-all duration-200 my-1 py-2.5", // Increased padding
+                "transition-all duration-200 my-1 py-2.5",
                 active && [
                   "bg-primary/15 text-primary",
                   "hover:bg-primary/20 hover:text-primary",
@@ -123,10 +122,10 @@ function MenuItems() {
               )}
             >
               <item.icon className={cn(
-                "h-5 w-5 transition-all duration-200", // Changed from size-4 (16px) to h-5 w-5 (20px)
+                "h-5 w-5 transition-all duration-200",
                 active && "scale-110 text-primary"
               )} />
-              <span className="text-sm">{item.label}</span> {/* Added text size */}
+              <span className="text-sm">{item.label}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         );
@@ -139,7 +138,8 @@ export default function MainLayout() {
   return (
     <TooltipProvider>
       <SidebarProvider defaultOpen={true}>
-        <div className="flex w-full min-h-screen">
+        {/* Main container with overflow-x-hidden to prevent side scroll */}
+        <div className="flex w-full min-h-screen overflow-x-hidden">
           <Sidebar collapsible="icon" className="flex flex-col">
             <SidebarContent>
               <ProjectLogo />
@@ -150,7 +150,8 @@ export default function MainLayout() {
             </SidebarFooter>
           </Sidebar>
 
-          <SidebarInset>
+          {/* SidebarInset with overflow-x-hidden */}
+          <SidebarInset className="overflow-x-hidden">
             <header className="flex h-14 items-center justify-between px-4 border-b bg-white dark:bg-sidebar sticky top-0 z-10 gap-4">
               <div className="flex items-center gap-4 flex-1">
                 <SidebarTrigger />
@@ -160,7 +161,8 @@ export default function MainLayout() {
                 <NavUser />
               </div>
             </header>
-            <main className="p-6">
+            {/* Main content with overflow-x-hidden */}
+            <main className="p-6 overflow-x-hidden">
               <Outlet />
             </main>
           </SidebarInset>

@@ -1,5 +1,6 @@
 // app/components/BacklogTab.tsx
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";  // ✅ Add this
 import { Search, Filter, Download, LayoutGrid, Inbox, ChevronLeft, ChevronRight, User, Flag, Circle, BookOpen, Bug, CheckSquare, Edit2, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,8 @@ import { SprintTable } from "@/components/ui/SprintTable";
 import { BacklogTable } from "@/components/ui/BacklogTable";
 import { ItemActionModal } from "@/components/ui/ItemActionModal";
 import { FilterDialog } from "@/components/ui/backlogFilterDialog";
-import DevelopmentPage from "../../My-Project/ProjectDetails/developmentpage";
+// ❌ Remove this import - no longer needed
+// import DevelopmentPage from "../../My-Project/ProjectDetails/developmentpage";
 
 // Initial Sprint Data
 const initialSprintData = [
@@ -153,6 +155,7 @@ interface BacklogTabProps {
 }
 
 export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
+  const navigate = useNavigate();  // ✅ Add navigate hook
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -161,8 +164,8 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
   const [modalMode, setModalMode] = useState<"edit" | "send">("edit");
   const [currentItem, setCurrentItem] = useState<any>(null);
   
-  // State to control which view to show
-  const [showDevelopment, setShowDevelopment] = useState(false);
+  // ❌ Remove showDevelopment state - no longer needed
+  // const [showDevelopment, setShowDevelopment] = useState(false);
   
   // Sprint data state
   const [sprintItems, setSprintItems] = useState(initialSprintData);
@@ -212,23 +215,25 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
     console.log("Export backlog");
   };
 
+  // ✅ Updated handleOpenBoard - navigate to route instead of conditional render
   const handleOpenBoard = () => {
-    setShowDevelopment(true);
+    navigate(`/project/${projectId}/development`);
   };
 
-  const handleBackToBacklog = () => {
-    setShowDevelopment(false);
-  };
+  // ❌ Remove handleBackToBacklog - no longer needed
+  // const handleBackToBacklog = () => {
+  //   setShowDevelopment(false);
+  // };
 
   const handleApplyFilters = () => {
     console.log("Filters applied");
     setFilterOpen(false);
   };
 
-  // If showDevelopment is true, show DevelopmentPage
-  if (showDevelopment) {
-    return <DevelopmentPage onBack={handleBackToBacklog} />;
-  }
+  // ❌ Remove conditional render - no longer needed
+  // if (showDevelopment) {
+  //   return <DevelopmentPage onBack={handleBackToBacklog} />;
+  // }
 
   // Select/Deselect sprint items
   const handleSelectSprintItem = (id: number) => {

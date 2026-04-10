@@ -19,6 +19,9 @@ import DsmLogs from "./pages/private/DsmLogs";
 import Companies from "./pages/private/Companies";
 import Team from "./pages/private/Team";
 
+// ✅ Import DevelopmentPage
+import DevelopmentPage from "./pages/private/My-Project/ProjectDetails/developmentpage";
+
 export default function App() {
   return (
     <Router>
@@ -40,6 +43,9 @@ export default function App() {
           <Route path="/companies" element={<Companies />} />
           <Route path="/team" element={<Team />} />
           <Route path="/project/:projectId" element={<ProjectDetail />} />
+          
+          {/* ✅ Development Route - Board view for project */}
+          <Route path="/project/:projectId/development" element={<DevelopmentPage />} />
         </Route>
       </Routes>
     </Router>

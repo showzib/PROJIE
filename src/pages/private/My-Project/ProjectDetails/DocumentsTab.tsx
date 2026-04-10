@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Plus, Download, Trash2 } from "lucide-react";
-import { DocumentUploadModal } from "@/components/ui/documentUploadModal";
+import { DocumentUploadModal } from "@/components/ui/DocumentUploadModal";
 import {
   Dialog,
   DialogContent,

@@ -1,6 +1,6 @@
 // src/pages/private/ProjectDetail.tsx
-import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Star, Edit, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,11 +25,17 @@ import type { MessageData } from "@/components/ui/ComposeMessageModal";
 export default function ProjectDetail() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // ✅ Get tab from URL or default to 'overview'
+  const searchParams = new URLSearchParams(location.search);
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
+  
   const [isStarred, setIsStarred] = useState(false);
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // ✅ Messages state yahan rakho - EmailThreads ke liye
+  // Messages state - EmailThreads ke liye
   const [messages, setMessages] = useState<MessageData[]>([
     {
       id: "1",
@@ -64,6 +70,18 @@ export default function ProjectDetail() {
     description: "",
   });
 
+  // ✅ Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/project/${projectId}?tab=${value}`, { replace: true });
+  };
+
+  // ✅ Sync tab state when URL changes (browser back/forward)
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'overview';
+    setActiveTab(tab);
+  }, [location.search]);
+
   const handleStar = () => {
     setIsStarred(!isStarred);
   };
@@ -89,10 +107,9 @@ export default function ProjectDetail() {
     }
   };
 
-  // ✅ Handle Send Message - Naya message add karega
   const handleSendMessage = (newMessage: MessageData) => {
     console.log("Message sent:", newMessage);
-    setMessages([newMessage, ...messages]); // ✅ Naya message upar add
+    setMessages([newMessage, ...messages]);
     setIsComposeModalOpen(false);
   };
 
@@ -113,7 +130,6 @@ export default function ProjectDetail() {
           Back to Projects
         </Button>
         
-        {/* ✅ Sirf yahan Compose Button hai - EmailThreadsTab mein nahi */}
         <Button onClick={() => setIsComposeModalOpen(true)}>
           Compose Message
         </Button>
@@ -147,8 +163,8 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <Tabs defaultValue="overview" className="w-full">
+      {/* Navigation Tabs - NOW WITH URL SYNC */}
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <div className="relative w-full overflow-x-auto pb-2">
           <TabsList className="inline-flex w-auto min-w-full lg:min-w-0 lg:w-full">
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -174,7 +190,6 @@ export default function ProjectDetail() {
         </TabsContent>
         
         <TabsContent value="emails" className="mt-6">
-          {/* ✅ Messages state pass karo */}
           <EmailThreadsTab 
             projectId={projectId} 
             messages={messages}

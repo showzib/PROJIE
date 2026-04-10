@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableHeader,
@@ -9,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, RefreshCw, Edit, Trash2, Eye } from "lucide-react";
+import { Search, RefreshCw, Eye } from "lucide-react";
 
 // Demo data with proper typing
 const demoData = [
@@ -57,6 +58,7 @@ interface Sprint {
 }
 
 export default function SprintsTab({ projectId }: { projectId?: string }) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sprints, setSprints] = useState<Sprint[]>(demoData);
 
@@ -94,26 +96,20 @@ export default function SprintsTab({ projectId }: { projectId?: string }) {
     // GitLab integration logic here
   };
 
- 
-
   const handleRefresh = () => {
     console.log("Refresh sprints");
-    // Refresh logic here
+    // Refresh logic here - you can fetch fresh data from API
+    // setSprints(freshData);
   };
 
-  const handleEdit = (sprintId: string) => {
-    console.log("Edit sprint:", sprintId);
-    // Edit logic here
-  };
-
-  const handleDelete = (sprintId: string) => {
-    console.log("Delete sprint:", sprintId);
-    // Delete logic here
-  };
-
-  const handleView = (sprintId: string) => {
-    console.log("View sprint:", sprintId);
-    // View logic here
+  const handleView = () => {
+    if (projectId) {
+      navigate(`/project/${projectId}/development`);
+    } else {
+      console.error("No projectId available");
+      // Fallback - send to existing page
+      navigate("/my-project");
+    }
   };
 
   return (
@@ -145,9 +141,7 @@ export default function SprintsTab({ projectId }: { projectId?: string }) {
             GitLab
           </Button>
 
-       
-
-          <Button variant="ghost" size="icon" onClick={handleRefresh}>
+          <Button variant="ghost" size="icon" onClick={handleRefresh} title="Refresh">
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
@@ -190,26 +184,10 @@ export default function SprintsTab({ projectId }: { projectId?: string }) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleView(sprint.id)}
-                        title="View"
+                        onClick={handleView}
+                        title="View Sprint Board"
                       >
                         <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(sprint.id)}
-                        title="Edit"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(sprint.id)}
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>

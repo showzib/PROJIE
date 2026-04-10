@@ -13,6 +13,7 @@ import { getIssueTypeIcon, getPriorityColor } from "@/hooks/helpers";
 interface TaskCardProps {
   task: Task;
   onStatusChange: (taskId: number, newStatus: string) => void;
+  onClick?: (task: Task) => void; // Add this prop for modal
 }
 
 const statusOptions = [
@@ -27,9 +28,22 @@ const statusOptions = [
   "Published",
 ];
 
-export function TaskCard({ task, onStatusChange }: TaskCardProps) {
+export function TaskCard({ task, onStatusChange, onClick }: TaskCardProps) {
+  // Handle card click (but not when clicking on dropdown menu)
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Check if click target is inside dropdown menu
+    const target = e.target as HTMLElement;
+    if (target.closest('[role="menuitem"]') || target.closest('[role="menu"]')) {
+      return; // Don't open modal if clicking on dropdown
+    }
+    onClick?.(task);
+  };
+
   return (
-    <div className="rounded-lg border bg-white dark:bg-gray-950 p-3 hover:shadow-md transition-shadow">
+    <div 
+      className="rounded-lg border bg-white dark:bg-gray-950 p-3 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Task Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2 flex-1">
@@ -39,7 +53,7 @@ export function TaskCard({ task, onStatusChange }: TaskCardProps) {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>

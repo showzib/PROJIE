@@ -20,30 +20,137 @@ interface Task {
   description: string;
   date: string;
   isStarred: boolean;
+  members?: { name: string; initials: string; image?: string }[];
 }
+
+// Helper function to get members for each card
+const getMembersForCard = (id: number) => {
+  const allMembers = [
+    { name: "Rahul Sharma", initials: "RS", image: "" },
+    { name: "Priya Patel", initials: "PP", image: "" },
+    { name: "Amit Kumar", initials: "AK", image: "" },
+    { name: "Neha Gupta", initials: "NG", image: "" },
+    { name: "Vikram Singh", initials: "VS", image: "" },
+    { name: "Sneha Reddy", initials: "SR", image: "" },
+  ];
+
+  switch (id) {
+    case 1:
+      return [allMembers[0]]; // 1 member
+    case 2:
+      return [allMembers[0], allMembers[1]]; // 2 members
+    case 3:
+      return [allMembers[0], allMembers[1], allMembers[2]]; // 3 members
+    case 4:
+      return [allMembers[0], allMembers[1], allMembers[2], allMembers[3]]; // 4 members
+    case 5:
+      return [allMembers[0], allMembers[1], allMembers[2], allMembers[3], allMembers[4]]; // 5 members
+    case 6:
+      return allMembers; // 6 members
+    case 7:
+      return [allMembers[0], allMembers[1]]; // 2 members
+    case 8:
+      return [allMembers[2], allMembers[3]]; // 2 members
+    case 9:
+      return [allMembers[4], allMembers[5]]; // 2 members
+    case 10:
+      return [allMembers[0], allMembers[2], allMembers[4]]; // 3 members
+    case 11:
+      return [allMembers[1], allMembers[3], allMembers[5]]; // 3 members
+    default:
+      return [allMembers[0], allMembers[1]]; // default 2 members
+  }
+};
 
 export default function MyProject() {
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: 1,
       title: "Design Review",
-      description: "spliseit",
+      description: "UI/UX design review and feedback",
       date: "2024-01-20",
-      isStarred: false
+      isStarred: false,
+      members: getMembersForCard(1)
     },
     {
       id: 2,
       title: "API Integration",
-      description: "spliseit",
+      description: "REST API integration with backend",
       date: "2024-01-21",
-      isStarred: true
+      isStarred: true,
+      members: getMembersForCard(2)
     },
     {
       id: 3,
       title: "Bug Fixing",
-      description: "spliseit",
+      description: "Fix critical bugs in production",
       date: "2024-01-22",
-      isStarred: false
+      isStarred: false,
+      members: getMembersForCard(3)
+    },
+    {
+      id: 4,
+      title: "Frontend Development",
+      description: "Build responsive UI components",
+      date: "2024-01-23",
+      isStarred: false,
+      members: getMembersForCard(4)
+    },
+    {
+      id: 5,
+      title: "Backend Integration",
+      description: "Database connection setup",
+      date: "2024-01-24",
+      isStarred: false,
+      members: getMembersForCard(5)
+    },
+    {
+      id: 6,
+      title: "Database Setup",
+      description: "Configure and optimize database",
+      date: "2024-01-25",
+      isStarred: true,
+      members: getMembersForCard(6)
+    },
+    {
+      id: 7,
+      title: "UI/UX Testing",
+      description: "User acceptance testing",
+      date: "2024-01-26",
+      isStarred: false,
+      members: getMembersForCard(7)
+    },
+    {
+      id: 8,
+      title: "Performance Optimization",
+      description: "Improve app loading speed",
+      date: "2024-01-27",
+      isStarred: false,
+      members: getMembersForCard(8)
+    },
+    {
+      id: 9,
+      title: "Security Audit",
+      description: "Security vulnerability assessment",
+      date: "2024-01-28",
+      isStarred: true,
+      members: getMembersForCard(9)
+    },
+    {
+      id: 10,
+      title: "Documentation",
+      description: "Write technical documentation",
+      date: "2024-01-29",
+      isStarred: false,
+      members: getMembersForCard(10)
+    },
+    {
+      id: 11,
+      title: "Deployment Setup",
+      description: "CI/CD pipeline configuration",
+      date: "2024-01-30",
+      isStarred: false,
+      members: getMembersForCard(11)
     }
   ]);
 
@@ -92,12 +199,14 @@ export default function MyProject() {
   };
 
   const handleProjectCreate = (newProject: any) => {
+    const newId = tasks.length + 1;
     const newTask: Task = {
-      id: tasks.length + 1,
+      id: newId,
       title: newProject.name,
       description: newProject.company,
       date: newProject.startDate,
-      isStarred: false
+      isStarred: false,
+      members: getMembersForCard(newId)
     };
     setTasks([...tasks, newTask]);
   };
@@ -115,7 +224,8 @@ export default function MyProject() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Grid for cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {tasks.map((task) => (
           <CardSmall
             key={task.id}
@@ -127,6 +237,7 @@ export default function MyProject() {
             onEdit={() => handleEdit(task)}
             onDelete={() => handleDeleteClick(task.id)}
             onStar={() => handleStar(task.id)}
+            members={task.members}
           />
         ))}
       </div>

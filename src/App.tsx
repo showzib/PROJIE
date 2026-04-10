@@ -43,8 +43,6 @@ export default function App() {
           <Route path="/companies" element={<Companies />} />
           <Route path="/team" element={<Team />} />
           <Route path="/project/:projectId" element={<ProjectDetail />} />
-          
-          {/* ✅ Development Route - Board view for project */}
           <Route path="/project/:projectId/development" element={<DevelopmentPage />} />
         </Route>
       </Routes>

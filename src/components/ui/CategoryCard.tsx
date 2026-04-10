@@ -1,16 +1,10 @@
 // app/development/components/CategoryCard.tsx
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
 import { useState } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Category } from "@/hooks/development.type";
+import type { Category, Task } from "@/hooks/development.type";
 import { TaskCard } from "./TaskCard";
+import DevelopmentCardDetailModal from "./developmentcarddetailModal"; 
 
 interface CategoryCardProps {
   category: Category;
@@ -19,6 +13,14 @@ interface CategoryCardProps {
 
 export function CategoryCard({ category, onTaskStatusChange }: CategoryCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Handle task click to open modal
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsModalOpen(true);
+  };
 
   // Color mapping for categories
   const getCategoryColor = (title: string) => {
@@ -52,47 +54,57 @@ export function CategoryCard({ category, onTaskStatusChange }: CategoryCardProps
   };
 
   return (
-    <div className={`rounded-lg border-2 ${getCategoryColor(category.title)} p-4 h-full flex flex-col`}>
-      {/* Category Header */}
-      <div className="flex justify-between items-center mb-4 pb-3 border-b">
-        <div>
-          <h3 className={`text-lg font-semibold ${getTitleColor(category.title)}`}>
-            {category.title}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            {category.tasks.length} tasks
-          </p>
+    <>
+      <div className={`rounded-lg border-2 ${getCategoryColor(category.title)} p-4 h-full flex flex-col`}>
+        {/* Category Header */}
+        <div className="flex justify-between items-center mb-4 pb-3 border-b">
+          <div>
+            <h3 className={`text-lg font-semibold ${getTitleColor(category.title)}`}>
+              {category.title}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              {category.tasks.length} tasks
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="h-8 w-8 p-0"
+          >
+            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="h-8 w-8 p-0"
-        >
-          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </Button>
+
+        {/* Vertical Carousel for Tasks */}
+        {isExpanded && (
+          <div className="flex-1 min-h-0">
+            {category.tasks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                No tasks in {category.title}
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                {category.tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onStatusChange={onTaskStatusChange}
+                    onClick={handleTaskClick} // Pass click handler
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Vertical Carousel for Tasks (Upside Down / Vertical Scroll) */}
-      {isExpanded && (
-        <div className="flex-1 min-h-0">
-          {category.tasks.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              No tasks in {category.title}
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-              {category.tasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onStatusChange={onTaskStatusChange}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+      {/* Modal - Make sure this matches your modal component name */}
+      <DevelopmentCardDetailModal
+        task={selectedTask}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
+    </>
   );
 }

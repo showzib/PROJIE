@@ -3,15 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Plus, Download, Trash2 } from "lucide-react";
-import { DocumentUploadModal } from "@/components/ui/DocumentUploadModal";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { CommonModal } from "@/components/ui/common.modal";
+import type { ModalType } from "@/components/ui/common.modal";
 import { toast } from "sonner";
 
 interface Document {
@@ -34,12 +27,11 @@ export default function DocumentsTab({ projectId }: DocumentsTabProps) {
     { id: 3, name: "Design Mockup.fig", type: "FIGMA", size: "5.6 MB", uploadedBy: "Alice Johnson", date: "2024-01-22" },
   ]);
   
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<ModalType | null>(null);
   const [deletingDocument, setDeletingDocument] = useState<Document | null>(null);
 
   const handleUpload = () => {
-    setIsUploadModalOpen(true);
+    setModalType("documentUpload");
   };
 
   const handleSaveDocument = (data: { name: string; file?: File | null; description?: string }) => {
@@ -55,17 +47,13 @@ export default function DocumentsTab({ projectId }: DocumentsTabProps) {
     
     setDocuments([newDocument, ...documents]);
     
-    // Success toast
     toast.success("Document uploaded!", {
       description: `${data.name} has been added successfully.`,
       duration: 3000,
     });
-    
-    console.log("Document saved:", data);
   };
 
   const handleDownload = (doc: Document) => {
-    // Download toast
     toast.info("Download started", {
       description: `${doc.name} is being downloaded.`,
       duration: 2000,
@@ -75,20 +63,19 @@ export default function DocumentsTab({ projectId }: DocumentsTabProps) {
 
   const handleDeleteClick = (doc: Document) => {
     setDeletingDocument(doc);
-    setIsDeleteModalOpen(true);
+    setModalType("documentDelete");
   };
 
   const handleConfirmDelete = () => {
     if (deletingDocument) {
       setDocuments(documents.filter(doc => doc.id !== deletingDocument.id));
       
-      // Delete toast
       toast.success("Document deleted", {
         description: `${deletingDocument.name} has been removed.`,
         duration: 3000,
       });
       
-      setIsDeleteModalOpen(false);
+      setModalType(null);
       setDeletingDocument(null);
     }
   };
@@ -151,32 +138,26 @@ export default function DocumentsTab({ projectId }: DocumentsTabProps) {
       </div>
 
       {/* Document Upload Modal */}
-      <DocumentUploadModal
-        open={isUploadModalOpen}
-        onOpenChange={setIsUploadModalOpen}
-        onSave={handleSaveDocument}
+      <CommonModal
+        open={modalType === "documentUpload"}
+        onOpenChange={() => {
+          setModalType(null);
+        }}
+        type="documentUpload"
+        onConfirm={handleSaveDocument}
       />
 
-      {/* Delete Confirmation Modal */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Delete Document</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{deletingDocument?.name}"? 
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Document Delete Modal */}
+      <CommonModal
+        open={modalType === "documentDelete"}
+        onOpenChange={() => {
+          setModalType(null);
+          setDeletingDocument(null);
+        }}
+        type="documentDelete"
+        data={{ name: deletingDocument?.name }}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

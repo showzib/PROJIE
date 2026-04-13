@@ -1,18 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Folder } from "lucide-react";
 import { CardSmall } from "@/components/ui/myprojectcard";
-import { AddProjectModal } from "@/components/ui/AddProjectModal";
+import { CommonModal } from "@/components/ui/common.modal";
+import type { ModalType } from "@/components/ui/common.modal";
 
 interface Task {
   id: number;
@@ -36,29 +27,29 @@ const getMembersForCard = (id: number) => {
 
   switch (id) {
     case 1:
-      return [allMembers[0]]; // 1 member
+      return [allMembers[0]];
     case 2:
-      return [allMembers[0], allMembers[1]]; // 2 members
+      return [allMembers[0], allMembers[1]];
     case 3:
-      return [allMembers[0], allMembers[1], allMembers[2]]; // 3 members
+      return [allMembers[0], allMembers[1], allMembers[2]];
     case 4:
-      return [allMembers[0], allMembers[1], allMembers[2], allMembers[3]]; // 4 members
+      return [allMembers[0], allMembers[1], allMembers[2], allMembers[3]];
     case 5:
-      return [allMembers[0], allMembers[1], allMembers[2], allMembers[3], allMembers[4]]; // 5 members
+      return [allMembers[0], allMembers[1], allMembers[2], allMembers[3], allMembers[4]];
     case 6:
-      return allMembers; // 6 members
+      return allMembers;
     case 7:
-      return [allMembers[0], allMembers[1]]; // 2 members
+      return [allMembers[0], allMembers[1]];
     case 8:
-      return [allMembers[2], allMembers[3]]; // 2 members
+      return [allMembers[2], allMembers[3]];
     case 9:
-      return [allMembers[4], allMembers[5]]; // 2 members
+      return [allMembers[4], allMembers[5]];
     case 10:
-      return [allMembers[0], allMembers[2], allMembers[4]]; // 3 members
+      return [allMembers[0], allMembers[2], allMembers[4]];
     case 11:
-      return [allMembers[1], allMembers[3], allMembers[5]]; // 3 members
+      return [allMembers[1], allMembers[3], allMembers[5]];
     default:
-      return [allMembers[0], allMembers[1]]; // default 2 members
+      return [allMembers[0], allMembers[1]];
   }
 };
 
@@ -154,61 +145,86 @@ export default function MyProject() {
     }
   ]);
 
-  const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
-  
-  // Edit Modal States
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  
-  // Delete Modal States
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
+  const [modalType, setModalType] = useState<ModalType | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleEdit = (task: Task) => {
-    setEditingTask(task);
-    setIsEditModalOpen(true);
+    setSelectedTask(task);
+    setModalType("editTask");
   };
 
-  const handleSaveEdit = () => {
-    if (editingTask) {
-      setTasks(tasks.map(task => 
-        task.id === editingTask.id ? editingTask : task
+  const handleSaveEdit = (data: any) => {
+    if (selectedTask) {
+      setTasks(tasks.map(task =>
+        task.id === selectedTask.id
+          ? {
+              ...task,
+              title: data.title || task.title,
+              description: data.description || task.description,
+              date: data.date || task.date
+            }
+          : task
       ));
-      setIsEditModalOpen(false);
-      setEditingTask(null);
+      setModalType(null);
+      setSelectedTask(null);
     }
   };
 
-  const handleDeleteClick = (taskId: number) => {
-    setDeletingTaskId(taskId);
-    setIsDeleteModalOpen(true);
+  const handleDeleteClick = (task: Task) => {
+    setSelectedTask(task);
+    setModalType("deleteConfirm");
   };
 
   const handleConfirmDelete = () => {
-    if (deletingTaskId) {
-      setTasks(tasks.filter(task => task.id !== deletingTaskId));
-      setIsDeleteModalOpen(false);
-      setDeletingTaskId(null);
+    if (selectedTask) {
+      setTasks(tasks.filter(task => task.id !== selectedTask.id));
+      setModalType(null);
+      setSelectedTask(null);
     }
   };
 
   const handleStar = (taskId: number) => {
-    setTasks(tasks.map(task => 
+    setTasks(tasks.map(task =>
       task.id === taskId ? { ...task, isStarred: !task.isStarred } : task
     ));
   };
 
-  const handleProjectCreate = (newProject: any) => {
+  const handleAddProject = () => {
+    setModalType("addProject");
+  };
+
+  const handleAddProjectConfirm = (data: any) => {
     const newId = tasks.length + 1;
     const newTask: Task = {
       id: newId,
-      title: newProject.name,
-      description: newProject.company,
-      date: newProject.startDate,
+      title: data.name,
+      description: data.company,
+      date: data.startDate,
       isStarred: false,
       members: getMembersForCard(newId)
     };
     setTasks([...tasks, newTask]);
+    setModalType(null);
+  };
+
+  // Get data for edit modal
+  const getEditModalData = () => {
+    if (selectedTask) {
+      return {
+        title: selectedTask.title,
+        description: selectedTask.description,
+        date: selectedTask.date,
+      };
+    }
+    return {};
+  };
+
+  // Get data for delete modal
+  const getDeleteModalData = () => {
+    if (selectedTask) {
+      return { title: selectedTask.title };
+    }
+    return {};
   };
 
   return (
@@ -218,7 +234,7 @@ export default function MyProject() {
           <h1 className="text-2xl font-bold">My Project</h1>
           <p className="text-muted-foreground">Your projects will appear here.</p>
         </div>
-        <Button onClick={() => setIsAddProjectModalOpen(true)}>
+        <Button onClick={handleAddProject}>
           <Folder className="mr-2 h-4 w-4" />
           Add Project
         </Button>
@@ -235,7 +251,7 @@ export default function MyProject() {
             date={task.date}
             isStarred={task.isStarred}
             onEdit={() => handleEdit(task)}
-            onDelete={() => handleDeleteClick(task.id)}
+            onDelete={() => handleDeleteClick(task)}
             onStar={() => handleStar(task.id)}
             members={task.members}
           />
@@ -243,78 +259,36 @@ export default function MyProject() {
       </div>
 
       {/* Add Project Modal */}
-      <AddProjectModal
-        open={isAddProjectModalOpen}
-        onOpenChange={setIsAddProjectModalOpen}
-        onProjectCreate={handleProjectCreate}
+      <CommonModal
+        open={modalType === "addProject"}
+        onOpenChange={() => setModalType(null)}
+        type="addProject"
+        onConfirm={handleAddProjectConfirm}
       />
 
-      {/* Edit Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Project</DialogTitle>
-            <DialogDescription>
-              Make changes to your project here.
-            </DialogDescription>
-          </DialogHeader>
-          {editingTask && (
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-title">Title</Label>
-                <Input
-                  id="edit-title"
-                  value={editingTask.title}
-                  onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-description">Description</Label>
-                <Input
-                  id="edit-description"
-                  value={editingTask.description}
-                  onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-date">Date</Label>
-                <Input
-                  id="edit-date"
-                  type="date"
-                  value={editingTask.date}
-                  onChange={(e) => setEditingTask({ ...editingTask, date: e.target.value })}
-                />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit}>Save changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Edit Task Modal */}
+      <CommonModal
+        open={modalType === "editTask"}
+        onOpenChange={() => {
+          setModalType(null);
+          setSelectedTask(null);
+        }}
+        type="editTask"
+        data={getEditModalData()}
+        onConfirm={handleSaveEdit}
+      />
 
-      {/* Delete Confirmation Modal */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Delete Project</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this project? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Delete Confirm Modal */}
+      <CommonModal
+        open={modalType === "deleteConfirm"}
+        onOpenChange={() => {
+          setModalType(null);
+          setSelectedTask(null);
+        }}
+        type="deleteConfirm"
+        data={getDeleteModalData()}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

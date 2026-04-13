@@ -14,13 +14,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OverviewTab from "./OverviewTab";
-import DocumentsTab from "./DocumentsTab";
+import DocumentsTab from "./Documenttab";
 import EmailThreadsTab from "./emailthreadstab";
 import CommentsTab from "./CommentsTab";
 import SprintsTab from "./SprintsTab";
-import BacklogTab from "./BacklogTab";
 import { ComposeMessageModal } from "@/components/ui/ComposeMessageModal";
 import type { MessageData } from "@/components/ui/ComposeMessageModal";
+import BacklogTab from "./BacklogTab";
 
 export default function ProjectDetail() {
   const { projectId } = useParams();

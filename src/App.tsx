@@ -11,7 +11,7 @@ import MyProject from "./pages/private/My-Project/MyProject";
 import MyBoards from "./pages/private/MyBoards";
 import Activities from "./pages/private/Activities";
 import TaskRequest from "./pages/private/TaskRequest";
-import ProjectDetail from "./pages/private/My-Project/ProjectDetails/ProjectDetail";
+import ProjectDetail from "./pages/private/My-Project/ProjectDetail";
 
 // New Pages - Customer, DSM Logs, Companies, Team
 import Customer from "./pages/private/Customer";
@@ -20,7 +20,7 @@ import Companies from "./pages/private/Companies";
 import Team from "./pages/private/Team";
 
 // ✅ Import DevelopmentPage
-import DevelopmentPage from "./pages/private/My-Project/ProjectDetails/developmentpage";
+import DevelopmentPage from "./pages/private/My-Project/developmentpage";
 
 export default function App() {
   return (

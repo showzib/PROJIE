@@ -1,36 +1,83 @@
 // src/pages/private/OverviewTab.tsx
+import { useState } from "react";
 import Timeline from "@/components/ui/timeline";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
+import { CommonModal } from "@/components/ui/common.modal";
+import type { ModalType } from "@/components/ui/common.modal";
 
 interface OverviewTabProps {
   projectId?: string;
   description?: string;
   date?: string;
   name?: string;
+  onProjectUpdate?: (data: any) => void;
 }
 
 export default function OverviewTab({ 
   projectId, 
   description, 
   date, 
-  name 
+  name,
+  onProjectUpdate 
 }: OverviewTabProps) {
+  const [modalType, setModalType] = useState<ModalType | null>(null);
+  
   // Hardcoded data for now - baad mein API se aayega
-  const projectInfo = {
+  const [projectInfo, setProjectInfo] = useState({
     department: "Software Development",
     createdOn: "2024-01-15",
     dueDate: "2024-03-30",
     lastWork: "2024-01-22",
     status: "In Progress",
     summary: "This project aims to deliver a complete web application with modern tech stack including React, Node.js, and PostgreSQL."
+  });
+
+  // Edit modal ke liye data
+  const editData = {
+    name: name,
+    description: description,
+    startDate: date,
+    company: projectInfo.department,
+    endDate: projectInfo.dueDate,
+  };
+
+  const handleEditSave = (data: any) => {
+    // Update project info
+    setProjectInfo({
+      ...projectInfo,
+      department: data.company || projectInfo.department,
+      dueDate: data.endDate || projectInfo.dueDate,
+      summary: data.description || projectInfo.summary,
+    });
+    
+    // Call parent update function if provided
+    if (onProjectUpdate) {
+      onProjectUpdate(data);
+    }
+    
+    setModalType(null);
   };
 
   return (
     <div className="space-y-6">
       {/* First Card - Summary and Information */}
       <div className="rounded-lg border p-6">
+        {/* Header with Edit Button */}
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="font-semibold">Project Summary</h3>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setModalType("editTask")}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Project
+          </Button>
+        </div>
+
         {/* Project Summary */}
         <div className="mb-6">
-          <h3 className="font-semibold mb-2">Project Summary</h3>
           <p className="text-muted-foreground leading-relaxed">
             {projectInfo.summary}
           </p>
@@ -76,6 +123,15 @@ export default function OverviewTab({
         <h3 className="font-semibold mb-8">Project Timeline</h3>
         <Timeline />
       </div>
+
+      {/* Edit Modal */}
+      <CommonModal
+        open={modalType === "editTask"}
+        onOpenChange={() => setModalType(null)}
+        type="editTask"
+        data={editData}
+        onConfirm={handleEditSave}
+      />
     </div>
   );
 }

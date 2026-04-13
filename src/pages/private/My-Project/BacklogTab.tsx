@@ -1,11 +1,11 @@
 // app/components/BacklogTab.tsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";  // ✅ Add this
+import { useNavigate } from "react-router-dom";
 import { Search, Filter, Download, LayoutGrid, Inbox, ChevronLeft, ChevronRight, User, Flag, Circle, BookOpen, Bug, CheckSquare, Edit2, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useFilters } from "../../../../../src/components/ui/hooks/useFilters";
-import { useBacklogData } from "../../../../hooks/useBacklogData";
+import { CommonModal } from "@/components/ui/common.modal";
+import type { ModalType } from "@/components/ui/common.modal";
 
 import {
   Select,
@@ -18,10 +18,8 @@ import { ActiveFilters } from "@/components/ui/backlogActiveFilters";
 import { SprintHeader } from "@/components/ui/backlogSprintHeader";
 import { SprintTable } from "@/components/ui/SprintTable";
 import { BacklogTable } from "@/components/ui/BacklogTable";
-import { ItemActionModal } from "@/components/ui/ItemActionModal";
-import { FilterDialog } from "@/components/ui/backlogFilterDialog";
-// ❌ Remove this import - no longer needed
-// import DevelopmentPage from "../../My-Project/ProjectDetails/developmentpage";
+import { useFilters } from "@/components/ui/hooks/useFilters";
+import { useBacklogData } from "@/hooks/useBacklogData";
 
 // Initial Sprint Data
 const initialSprintData = [
@@ -154,18 +152,16 @@ interface BacklogTabProps {
   onOpenBoard?: () => void;
 }
 
-export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
-  const navigate = useNavigate();  // ✅ Add navigate hook
+export default function BacklogTab({ projectId, onOpenBoard }: BacklogTabProps) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterOpen, setFilterOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [selectedSprintItems, setSelectedSprintItems] = useState<number[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"edit" | "send">("edit");
-  const [currentItem, setCurrentItem] = useState<any>(null);
   
-  // ❌ Remove showDevelopment state - no longer needed
-  // const [showDevelopment, setShowDevelopment] = useState(false);
+  // Modal states
+  const [modalType, setModalType] = useState<ModalType | null>(null);
+  const [currentItem, setCurrentItem] = useState<any>(null);
+  const [editFormData, setEditFormData] = useState<any>({});
   
   // Sprint data state
   const [sprintItems, setSprintItems] = useState(initialSprintData);
@@ -215,25 +211,13 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
     console.log("Export backlog");
   };
 
-  // ✅ Updated handleOpenBoard - navigate to route instead of conditional render
   const handleOpenBoard = () => {
     navigate(`/project/${projectId}/development`);
   };
 
-  // ❌ Remove handleBackToBacklog - no longer needed
-  // const handleBackToBacklog = () => {
-  //   setShowDevelopment(false);
-  // };
-
   const handleApplyFilters = () => {
-    console.log("Filters applied");
-    setFilterOpen(false);
+    setModalType(null);
   };
-
-  // ❌ Remove conditional render - no longer needed
-  // if (showDevelopment) {
-  //   return <DevelopmentPage onBack={handleBackToBacklog} />;
-  // }
 
   // Select/Deselect sprint items
   const handleSelectSprintItem = (id: number) => {
@@ -253,22 +237,57 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
   // Edit item
   const handleEditItem = (item: any) => {
     setCurrentItem(item);
-    setModalMode("edit");
-    setModalOpen(true);
+    setEditFormData({
+      title: item.summary,
+      people: item.assignee,
+      projectName: item.feature,
+      estimates: `${item.estimatedTime}h`,
+      issueType: item.issueType,
+      priority: item.priority,
+      status: item.status,
+      teams: item.teams,
+    });
+    setModalType("editTask");
   };
 
-  const handleSaveEdit = (updatedItem: any) => {
-    setSprintItems(prev =>
-      prev.map(item =>
-        item.id === updatedItem.id ? updatedItem : item
-      )
-    );
+  const handleSaveEdit = (data: any) => {
+    if (currentItem) {
+      setSprintItems(prev =>
+        prev.map(item =>
+          item.id === currentItem.id
+            ? {
+                ...item,
+                summary: data.title || item.summary,
+                assignee: data.people || item.assignee,
+                feature: data.projectName || item.feature,
+                estimatedTime: parseInt(data.estimates) || item.estimatedTime,
+                issueType: data.issueType || item.issueType,
+                priority: data.priority || item.priority,
+                status: data.status || item.status,
+                teams: data.teams || item.teams,
+              }
+            : item
+        )
+      );
+    }
+    setModalType(null);
+    setCurrentItem(null);
   };
 
   // Delete item
   const handleDeleteItem = (id: number) => {
-    setSprintItems(prev => prev.filter(item => item.id !== id));
-    setSelectedSprintItems(prev => prev.filter(itemId => itemId !== id));
+    const itemToDelete = sprintItems.find(item => item.id === id);
+    setCurrentItem(itemToDelete);
+    setModalType("deleteConfirm");
+  };
+
+  const handleConfirmDelete = () => {
+    if (currentItem) {
+      setSprintItems(prev => prev.filter(item => item.id !== currentItem.id));
+      setSelectedSprintItems(prev => prev.filter(id => id !== currentItem.id));
+    }
+    setModalType(null);
+    setCurrentItem(null);
   };
 
   // Send to backlog
@@ -282,11 +301,22 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
   const handleConfirmSendToBacklog = (item: any) => {
     setBacklogItems(prev => [...prev, item]);
     setSprintItems(prev => prev.filter(i => i.id !== item.id));
+    setModalType(null);
   };
 
   // Backlog actions
   const handleDeleteFromBacklog = (id: number) => {
-    setBacklogItems(prev => prev.filter(item => item.id !== id));
+    const itemToDelete = backlogItems.find(item => item.id === id);
+    setCurrentItem(itemToDelete);
+    setModalType("deleteConfirm");
+  };
+
+  const handleConfirmBacklogDelete = () => {
+    if (currentItem) {
+      setBacklogItems(prev => prev.filter(item => item.id !== currentItem.id));
+    }
+    setModalType(null);
+    setCurrentItem(null);
   };
 
   const handleSendToSprint = (item: any) => {
@@ -294,6 +324,11 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
     const itemWithNewId = { ...item, id: newId };
     setSprintItems(prev => [...prev, itemWithNewId]);
     setBacklogItems(prev => prev.filter(i => i.id !== item.id));
+  };
+
+  // Open filter modal
+  const handleOpenFilter = () => {
+    setModalType("backlogFilter");
   };
 
   // Mobile Card View for Sprint Items
@@ -426,7 +461,7 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
           <p className="text-muted-foreground">No items in backlog</p>
         </div>
       ) : (
-        backlogItems.map((item, index) => (
+        backlogItems.map((item) => (
           <div key={item.id} className="rounded-lg border bg-card p-4 space-y-3">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-2 flex-1">
@@ -501,6 +536,21 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
     </div>
   );
 
+  // Filter data for CommonModal
+  const filterData = {
+    selectedStatus,
+    setSelectedStatus,
+    selectedPriority,
+    setSelectedPriority,
+    selectedTeam,
+    setSelectedTeam,
+    selectedIssueType,
+    setSelectedIssueType,
+    onApplyFilters: handleApplyFilters,
+    onClearFilters: clearFilters,
+    activeFiltersCount,
+  };
+
   return (
     <div className="space-y-4 px-2 sm:px-4">
       {/* Header with Search and Filter Button */}
@@ -516,21 +566,15 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <FilterDialog
-            open={filterOpen}
-            onOpenChange={setFilterOpen}
-            selectedStatus={selectedStatus}
-            setSelectedStatus={setSelectedStatus}
-            selectedPriority={selectedPriority}
-            setSelectedPriority={setSelectedPriority}
-            selectedTeam={selectedTeam}
-            setSelectedTeam={setSelectedTeam}
-            selectedIssueType={selectedIssueType}
-            setSelectedIssueType={setSelectedIssueType}
-            onApplyFilters={handleApplyFilters}
-            onClearFilters={clearFilters}
-            activeFiltersCount={activeFiltersCount}
-          />
+          <Button variant="outline" onClick={handleOpenFilter} className="relative">
+            <Filter className="mr-2 h-4 w-4" />
+            Filter
+            {activeFiltersCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                {activeFiltersCount}
+              </span>
+            )}
+          </Button>
 
           <Button variant="outline" onClick={handleExport} size="sm" className="sm:size-default">
             <Download className="mr-2 h-4 w-4" />
@@ -554,7 +598,7 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
         onClearFilters={clearFilters}
       />
 
-      {/* Sprint Section - With overflow-x-auto to fix side scroll */}
+      {/* Sprint Section */}
       <div className="space-y-3">
         <SprintHeader taskCount={filteredSprint.length} />
         
@@ -584,7 +628,7 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
         )}
       </div>
 
-      {/* Backlog Section - With overflow-x-auto to fix side scroll */}
+      {/* Backlog Section */}
       <div className="space-y-3">
         <div className="rounded-lg border bg-card p-3 sm:p-4">
           <div className="flex items-center justify-between">
@@ -615,14 +659,44 @@ export default function BacklogTab({ projectId, onOpenBoard}: BacklogTabProps) {
         )}
       </div>
 
-      {/* Modal for Edit/Send to Backlog */}
-      <ItemActionModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        item={currentItem}
-        onSave={handleSaveEdit}
-        onSendToBacklog={handleConfirmSendToBacklog}
-        mode={modalMode}
+      {/* Edit Task Modal */}
+      <CommonModal
+        open={modalType === "editTask"}
+        onOpenChange={() => {
+          setModalType(null);
+          setCurrentItem(null);
+        }}
+        type="editTask"
+        data={editFormData}
+        onConfirm={handleSaveEdit}
+      />
+
+      {/* Delete Confirm Modal */}
+      <CommonModal
+        open={modalType === "deleteConfirm"}
+        onOpenChange={() => {
+          setModalType(null);
+          setCurrentItem(null);
+        }}
+        type="deleteConfirm"
+        data={{ title: currentItem?.summary }}
+        onConfirm={() => {
+          if (currentItem) {
+            if (sprintItems.some(i => i.id === currentItem.id)) {
+              handleConfirmDelete();
+            } else {
+              handleConfirmBacklogDelete();
+            }
+          }
+        }}
+      />
+
+      {/* Filter Modal */}
+      <CommonModal
+        open={modalType === "backlogFilter"}
+        onOpenChange={() => setModalType(null)}
+        type="backlogFilter"
+        data={filterData}
       />
     </div>
   );

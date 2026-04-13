@@ -52,6 +52,7 @@ export type ModalType =
   | "documentUpload"
   | "documentDelete"
   | "inviteUser";
+    "viewTask"; 
 
 export interface CommonModalProps {
   open: boolean;

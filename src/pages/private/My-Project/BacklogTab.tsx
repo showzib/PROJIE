@@ -18,7 +18,7 @@ import { ActiveFilters } from "@/components/ui/backlogActiveFilters";
 import { SprintHeader } from "@/components/ui/backlogSprintHeader";
 import { SprintTable } from "@/components/ui/SprintTable";
 import { BacklogTable } from "@/components/ui/BacklogTable";
-import { useFilters } from "@/components/ui/hooks/useFilters";
+import { useFilters } from "@/hooks/useFilters";
 import { useBacklogData } from "@/hooks/useBacklogData";
 
 // Initial Sprint Data

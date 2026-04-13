@@ -9,7 +9,7 @@ import { SprintHeader } from "./backlogSprintHeader";
 import { BacklogTableView } from "./BacklogTableView";
 import { BacklogMobileView } from "./BacklogMobileView";
 import { useBacklogData } from "../../hooks/useBacklogData";
-import { useFilters } from "./hooks/useFilters";
+import { useFilters } from "../../hooks/useFilters";
 import { EditableCell } from "./EditableCell";
 
 interface BacklogTabProps {

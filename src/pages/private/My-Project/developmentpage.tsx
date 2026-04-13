@@ -3,7 +3,7 @@
 
 import { useNavigate, useParams } from "react-router-dom";
 import { DevelopmentFilterDialog } from "@/components/ui/DevelopmentFilterDialog";
-import { useFilters } from "@/components/ui/hooks/useFilters";
+import { useFilters } from "@/hooks/useFilters";
 import { MainCarousel } from "@/components/ui/MainCarousel";
 import { useDevelopmentData } from "@/hooks/useDevelopmentData";
 import { useState, useEffect } from "react";

@@ -23,6 +23,7 @@ import {
   Building2,
   UserCircle,
   FileSearch,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +86,7 @@ function MenuItems() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ Path sahi kiya - "/invoice" (match with App.jsx route)
   const menuItems = [
     { path: "/my-project", label: "My Project", icon: FileText },
     { path: "/my-boards", label: "My Boards", icon: LayoutDashboard },
@@ -93,6 +95,7 @@ function MenuItems() {
     { path: "/customer", label: "Customer", icon: UserCircle },
     { path: "/companies", label: "Companies", icon: Building2 },
     { path: "/team", label: "Team", icon: Users },
+    { path: "/invoice", label: "Invoice", icon: Receipt }, // ✅ Path sahi kiya
     { path: "/dsm-logs", label: "DSM Logs", icon: FileSearch },
   ];
 
@@ -138,7 +141,6 @@ export default function MainLayout() {
   return (
     <TooltipProvider>
       <SidebarProvider defaultOpen={true}>
-        {/* Main container with overflow-x-hidden to prevent side scroll */}
         <div className="flex w-full min-h-screen overflow-x-hidden">
           <Sidebar collapsible="icon" className="flex flex-col">
             <SidebarContent>
@@ -150,7 +152,6 @@ export default function MainLayout() {
             </SidebarFooter>
           </Sidebar>
 
-          {/* SidebarInset with overflow-x-hidden */}
           <SidebarInset className="overflow-x-hidden">
             <header className="flex h-14 items-center justify-between px-4 border-b bg-white dark:bg-sidebar sticky top-0 z-10 gap-4">
               <div className="flex items-center gap-4 flex-1">
@@ -161,7 +162,6 @@ export default function MainLayout() {
                 <NavUser />
               </div>
             </header>
-            {/* Main content with overflow-x-hidden */}
             <main className="p-6 overflow-x-hidden">
               <Outlet />
             </main>

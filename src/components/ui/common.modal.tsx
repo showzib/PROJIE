@@ -23,15 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  UserPlus, 
-  Users, 
-  ChevronRight, 
-  ChevronLeft, 
-  X, 
-  Bold, 
-  Italic, 
-  List, 
+import {
+  UserPlus,
+  Users,
+  ChevronRight,
+  ChevronLeft,
+  X,
+  Bold,
+  Italic,
+  List,
   ListOrdered,
   FileText,
   Upload,
@@ -39,20 +39,26 @@ import {
   Send
 } from "lucide-react";
 
-export type ModalType = 
-  | "addTask" 
-  | "editTask" 
-  | "deleteConfirm" 
-  | "addProject" 
-  | "composeMessage" 
-  | "developmentDetail" 
+export type ModalType =
+  | "addTask"
+  | "editTask"
+  | "deleteConfirm"
+  | "addProject"
+  | "composeMessage"
+  | "developmentDetail"
   | "filter"
   | "backlogFilter"
   | "developmentFilter"
   | "documentUpload"
   | "documentDelete"
-  | "inviteUser";
-    "viewTask"; 
+  | "inviteUser"
+  | "viewTask"
+  | "addPayment"
+  | "viewPayment"
+  | "addProduct"
+  | "viewProduct"
+  | "addUnit"
+  | "viewUnit";
 
 export interface CommonModalProps {
   open: boolean;
@@ -62,6 +68,30 @@ export interface CommonModalProps {
   onConfirm?: (data?: any) => void;
   onCancel?: () => void;
 }
+
+// Helper function to clean HTML text
+const cleanHtmlText = (html: string) => {
+  if (!html) return '';
+  // Remove HTML tags
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  return tempDiv.textContent || tempDiv.innerText || '';
+};
+
+// Helper function to clean data for Payment, Product, Unit
+const cleanDataForModal = (data: any, modalType: ModalType) => {
+  if (!data) return data;
+
+  // Only clean for these types
+  if (modalType === "addPayment" || modalType === "addProduct" || modalType === "addUnit") {
+    const cleaned = { ...data };
+    if (cleaned.description && (cleaned.description.includes('<') || cleaned.description.includes('>'))) {
+      cleaned.description = cleanHtmlText(cleaned.description);
+    }
+    return cleaned;
+  }
+  return data;
+};
 
 interface TeamMember {
   id: number;
@@ -78,10 +108,15 @@ export function CommonModal({
   onConfirm,
   onCancel,
 }: CommonModalProps) {
-  const [formData, setFormData] = React.useState<any>(data || {});
+  // Clean data when setting initial state
+  const getCleanedData = () => {
+    return cleanDataForModal(data, type);
+  };
+
+  const [formData, setFormData] = React.useState<any>(getCleanedData() || {});
   const [step, setStep] = React.useState(1);
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-  
+
   // Development Detail specific states
   const [message, setMessage] = React.useState("");
   const [labels, setLabels] = React.useState<string[]>(["SN", "AC"]);
@@ -91,7 +126,7 @@ export function CommonModal({
     { id: 2, name: "Re Open Count", value: "" },
     { id: 3, name: "Positive flow", value: "" },
   ]);
-  
+
   // Add Project specific states
   const [searchPeopleQuery, setSearchPeopleQuery] = React.useState("");
   const [searchResults] = React.useState<TeamMember[]>([
@@ -123,7 +158,9 @@ export function CommonModal({
 
   React.useEffect(() => {
     if (data) {
-      setFormData(data);
+      // Clean data when it changes
+      const cleanedData = cleanDataForModal(data, type);
+      setFormData(cleanedData);
     }
     if (open) {
       setStep(1);
@@ -140,7 +177,7 @@ export function CommonModal({
         { id: 3, name: "Positive flow", value: "" },
       ]);
     }
-  }, [data, open]);
+  }, [data, open, type]);
 
   React.useEffect(() => {
     if (editor && formData.description !== editor.getHTML()) {
@@ -234,7 +271,12 @@ export function CommonModal({
         customFields,
       });
     } else {
-      onConfirm?.(formData);
+      // For Payment, Product, Unit - ensure description is clean
+      const finalData = { ...formData };
+      if ((type === "addPayment" || type === "addProduct" || type === "addUnit") && finalData.description) {
+        finalData.description = cleanHtmlText(finalData.description);
+      }
+      onConfirm?.(finalData);
     }
     onOpenChange(false);
   };
@@ -311,6 +353,282 @@ export function CommonModal({
               <SelectItem value="Customer">Customer</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
+    );
+  };
+
+  // Payment Form Modal Content
+  const renderPaymentForm = () => {
+    const currencies = ["AED", "USD", "EUR", "GBP", "SAR"];
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <Label>Payment Name *</Label>
+          <Input
+            value={formData.name || ""}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Enter payment name"
+          />
+        </div>
+
+        <div>
+          <Label>Description</Label>
+          <Textarea
+            value={cleanHtmlText(formData.description || "")}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Enter description"
+            rows={3}
+          />
+        </div>
+
+        <div>
+          <Label>Date *</Label>
+          <Input
+            type="date"
+            value={formData.date || ""}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Currency *</Label>
+            <Select value={formData.currency || ""} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {currencies.map((curr) => (
+                  <SelectItem key={curr} value={curr}>{curr}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Amount *</Label>
+            <Input
+              type="number"
+              value={formData.amount || ""}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              placeholder="Enter amount"
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label>Bank Name *</Label>
+          <Input
+            value={formData.bankName || ""}
+            onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+            placeholder="Enter bank name"
+          />
+        </div>
+
+        <div>
+          <Label>Items</Label>
+          <Input
+            value={formData.items || ""}
+            onChange={(e) => setFormData({ ...formData, items: e.target.value })}
+            placeholder="Enter items"
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // View Payment Modal Content
+  const renderViewPayment = () => {
+    const formatCurrency = (amount: number, currency: string) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+      }).format(amount);
+    };
+
+    // Clean description for display
+    const displayDescription = formData.description ? cleanHtmlText(formData.description) : "-";
+
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label className="text-muted-foreground text-xs">Payment Name</Label>
+            <p className="font-medium mt-1">{formData.name || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Created At</Label>
+            <p className="font-medium mt-1">{formData.createdAt || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Date</Label>
+            <p className="font-medium mt-1">{formData.date || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Currency</Label>
+            <p className="font-medium mt-1">{formData.currency || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Amount</Label>
+            <p className="font-medium mt-1 text-green-600">
+              {formData.amount && formData.currency
+                ? formatCurrency(parseFloat(formData.amount), formData.currency)
+                : formData.amount || "-"}
+            </p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Bank Name</Label>
+            <p className="font-medium mt-1">{formData.bankName || "-"}</p>
+          </div>
+        </div>
+        <div>
+          <Label className="text-muted-foreground text-xs">Description</Label>
+          <p className="text-sm mt-1">{displayDescription}</p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground text-xs">Items</Label>
+          <p className="text-sm mt-1">{formData.items || "-"}</p>
+        </div>
+      </div>
+    );
+  };
+
+  // Product Form Modal Content
+  const renderProductForm = () => {
+    const brandOptions = ["Splise It", "Tech Corp", "Design Studio", "Apple", "Samsung", "Dell"];
+    const unitOptions = ["Piece", "Kg", "Liter", "Box", "Set", "--"];
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <Label>Product Name *</Label>
+          <Input
+            value={formData.name || ""}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Enter product name"
+          />
+        </div>
+
+        <div>
+          <Label>Brand Name *</Label>
+          <Select value={formData.brandName || ""} onValueChange={(value) => setFormData({ ...formData, brandName: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select brand" />
+            </SelectTrigger>
+            <SelectContent>
+              {brandOptions.map((brand) => (
+                <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Unit Name</Label>
+          <Select value={formData.unitName || "--"} onValueChange={(value) => setFormData({ ...formData, unitName: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select unit" />
+            </SelectTrigger>
+            <SelectContent>
+              {unitOptions.map((unit) => (
+                <SelectItem key={unit} value={unit}>{unit}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Description</Label>
+          <Textarea
+            value={cleanHtmlText(formData.description || "")}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Enter product description"
+            rows={3}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // View Product Modal Content
+  const renderViewProduct = () => {
+    const displayDescription = formData.description ? cleanHtmlText(formData.description) : "-";
+
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label className="text-muted-foreground text-xs">Product Name</Label>
+            <p className="font-medium mt-1">{formData.name || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Brand Name</Label>
+            <p className="font-medium mt-1">{formData.brandName || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Unit Name</Label>
+            <p className="font-medium mt-1">{formData.unitName || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Created At</Label>
+            <p className="font-medium mt-1">{formData.createdAt || "-"}</p>
+          </div>
+        </div>
+        <div>
+          <Label className="text-muted-foreground text-xs">Description</Label>
+          <p className="text-sm mt-1">{displayDescription}</p>
+        </div>
+      </div>
+    );
+  };
+
+  // Unit Form Modal Content
+  const renderUnitForm = () => {
+    return (
+      <div className="space-y-4">
+        <div>
+          <Label>Unit Name *</Label>
+          <Input
+            value={formData.name || ""}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Enter unit name (e.g., Piece, Kg, Liter)"
+          />
+        </div>
+
+        <div>
+          <Label>Description</Label>
+          <Textarea
+            value={formData.description || ""}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Enter unit description"
+            rows={3}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  // View Unit Modal Content
+  const renderViewUnit = () => {
+    const displayDescription = formData.description ? cleanHtmlText(formData.description) : "-";
+
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label className="text-muted-foreground text-xs">Unit Name</Label>
+            <p className="font-medium mt-1">{formData.name || "-"}</p>
+          </div>
+          <div>
+            <Label className="text-muted-foreground text-xs">Created At</Label>
+            <p className="font-medium mt-1">{formData.createdAt || "-"}</p>
+          </div>
+        </div>
+        <div>
+          <Label className="text-muted-foreground text-xs">Description</Label>
+          <p className="text-sm mt-1">{displayDescription}</p>
         </div>
       </div>
     );
@@ -573,9 +891,9 @@ export function CommonModal({
               <div className="flex items-center justify-center gap-2">
                 <FileText className="h-8 w-8 text-blue-500" />
                 <span className="text-sm">{selectedFile.name}</span>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={(e) => {
                     e.preventDefault();
                     setSelectedFile(null);
@@ -729,13 +1047,19 @@ export function CommonModal({
     switch (type) {
       case "addTask": return "Add Task Request";
       case "editTask": return "Edit Project";
-      case "deleteConfirm": return "Delete Task";
+      case "deleteConfirm": return "Delete Item";
       case "addProject": return step === 1 ? "Add New Project" : step === 2 ? "Add Team Members" : "Existing Team";
       case "composeMessage": return "Compose Message";
       case "developmentDetail": return formData?.title || "Task Details";
       case "documentUpload": return "Upload Document";
       case "documentDelete": return "Delete Document";
       case "inviteUser": return "Invite Person";
+      case "addPayment": return formData?.id ? "Edit Payment" : "Add Payment";
+      case "viewPayment": return "Payment Details";
+      case "addProduct": return formData?.id ? "Edit Product" : "Add Product";
+      case "viewProduct": return "Product Details";
+      case "addUnit": return formData?.id ? "Edit Unit" : "Add Unit";
+      case "viewUnit": return "Unit Details";
       case "filter": return "Filter Tasks";
       case "backlogFilter": return "Filter Backlog Tasks";
       case "developmentFilter": return "Filter Development Tasks";
@@ -759,6 +1083,12 @@ export function CommonModal({
       case "documentUpload": return "Upload";
       case "developmentDetail": return "Save Changes";
       case "inviteUser": return "Invite People";
+      case "addPayment": return "Save Payment";
+      case "viewPayment": return "Close";
+      case "addProduct": return "Save Product";
+      case "viewProduct": return "Close";
+      case "addUnit": return "Save Unit";
+      case "viewUnit": return "Close";
       case "addProject": return step === 3 ? "Create Project" : "Next";
       case "composeMessage": return "Send";
       default: return type === "addTask" ? "Add Task" : "Save Changes";
@@ -789,6 +1119,18 @@ export function CommonModal({
         return renderDevelopmentDetailContent();
       case "inviteUser":
         return renderInviteUserContent();
+      case "addPayment":
+        return renderPaymentForm();
+      case "viewPayment":
+        return renderViewPayment();
+      case "addProduct":
+        return renderProductForm();
+      case "viewProduct":
+        return renderViewProduct();
+      case "addUnit":
+        return renderUnitForm();
+      case "viewUnit":
+        return renderViewUnit();
       case "addProject":
         if (step === 1) return renderProjectStep1();
         if (step === 2) return renderProjectStep2();
@@ -805,61 +1147,112 @@ export function CommonModal({
   };
 
   const handleModalConfirm = () => {
+    // Payment validation
+    if (type === "addPayment") {
+      if (!formData.name?.trim()) {
+        toast.error("Payment name is required");
+        return;
+      }
+      if (!formData.date) {
+        toast.error("Date is required");
+        return;
+      }
+      if (!formData.currency) {
+        toast.error("Currency is required");
+        return;
+      }
+      if (!formData.amount || parseFloat(formData.amount) <= 0) {
+        toast.error("Valid amount is required");
+        return;
+      }
+      if (!formData.bankName?.trim()) {
+        toast.error("Bank name is required");
+        return;
+      }
+
+      toast.success(formData.id ? "Payment updated successfully!" : "Payment added successfully!", {
+        duration: 2000,
+      });
+    }
+
+    // Product validation
+    if (type === "addProduct") {
+      if (!formData.name?.trim()) {
+        toast.error("Product name is required");
+        return;
+      }
+      if (!formData.brandName?.trim()) {
+        toast.error("Brand name is required");
+        return;
+      }
+
+      toast.success(formData.id ? "Product updated successfully!" : "Product added successfully!", {
+        duration: 2000,
+      });
+    }
+
+    // Unit validation
+    if (type === "addUnit") {
+      if (!formData.name?.trim()) {
+        toast.error("Unit name is required");
+        return;
+      }
+
+      toast.success(formData.id ? "Unit updated successfully!" : "Unit added successfully!", {
+        duration: 2000,
+      });
+    }
+
+    if (type === "viewPayment" || type === "viewProduct" || type === "viewUnit") {
+      onOpenChange(false);
+      return;
+    }
+
     if (type === "addProject") {
       if (step === 1) {
-        if (!formData.name?.trim()) { 
-          toast.error("Project name is required"); 
-          return; 
+        if (!formData.name?.trim()) {
+          toast.error("Project name is required");
+          return;
         }
-        if (!formData.startDate) { 
-          toast.error("Start date is required"); 
-          return; 
+        if (!formData.startDate) {
+          toast.error("Start date is required");
+          return;
         }
-        if (!formData.company?.trim()) { 
-          toast.error("Company/Client name is required"); 
-          return; 
+        if (!formData.company?.trim()) {
+          toast.error("Company/Client name is required");
+          return;
         }
         setStep(2);
         return;
       }
-      if (step === 2) { 
-        setStep(3); 
-        return; 
+      if (step === 2) {
+        setStep(3);
+        return;
       }
     }
-    
+
     if (type === "documentUpload") {
-      if (!formData.name?.trim()) { 
-        toast.error("Document name is required"); 
-        return; 
+      if (!formData.name?.trim()) {
+        toast.error("Document name is required");
+        return;
       }
-      if (!selectedFile) { 
-        toast.error("Please select a file to upload"); 
-        return; 
+      if (!selectedFile) {
+        toast.error("Please select a file to upload");
+        return;
       }
     }
-    
-    // Compose Message Validation
+
     if (type === "composeMessage") {
       if (!formData.subject?.trim()) {
-        toast.error("Subject is required", {
-          description: "Please enter a subject for your message",
-          duration: 3000,
-        });
+        toast.error("Subject is required");
         return;
       }
       if (!formData.selectedUsers || formData.selectedUsers.length === 0) {
-        toast.error("Recipients required", {
-          description: "Please select at least one recipient",
-          duration: 3000,
-        });
+        toast.error("Recipients required");
         return;
       }
       if (!formData.message?.trim()) {
-        toast.error("Message is required", {
-          description: "Please enter your message content",
-          duration: 3000,
-        });
+        toast.error("Message is required");
         return;
       }
       toast.success("Message sent successfully!", {
@@ -867,49 +1260,30 @@ export function CommonModal({
         duration: 3000,
       });
     }
-    
-    // Invite User Validation
+
     if (type === "inviteUser") {
       if (!formData.firstName?.trim()) {
-        toast.error("First name is required", {
-          description: "Please enter first name",
-          duration: 3000,
-        });
+        toast.error("First name is required");
         return;
       }
       if (!formData.lastName?.trim()) {
-        toast.error("Last name is required", {
-          description: "Please enter last name",
-          duration: 3000,
-        });
+        toast.error("Last name is required");
         return;
       }
       if (!formData.email?.trim()) {
-        toast.error("Email is required", {
-          description: "Please enter email address",
-          duration: 3000,
-        });
+        toast.error("Email is required");
         return;
       }
       if (!formData.email?.includes("@")) {
-        toast.error("Valid email is required", {
-          description: "Please enter a valid email address",
-          duration: 3000,
-        });
+        toast.error("Valid email is required");
         return;
       }
       if (!formData.company) {
-        toast.error("Company is required", {
-          description: "Please select a company",
-          duration: 3000,
-        });
+        toast.error("Company is required");
         return;
       }
       if (!formData.userType) {
-        toast.error("User type is required", {
-          description: "Please select user type",
-          duration: 3000,
-        });
+        toast.error("User type is required");
         return;
       }
       toast.success("Invitation sent successfully!", {
@@ -917,61 +1291,46 @@ export function CommonModal({
         duration: 3000,
       });
     }
-    
-    // Edit Task Validation
+
     if (type === "editTask") {
       const isTaskRequest = formData.title !== undefined || formData.people !== undefined;
-      
+
       if (isTaskRequest) {
         if (!formData.title?.trim()) {
-          toast.error("Title is required", {
-            description: "Please enter a task title",
-            duration: 3000,
-          });
+          toast.error("Title is required");
           return;
         }
         if (!formData.people?.trim()) {
-          toast.error("People is required", {
-            description: "Please enter person name",
-            duration: 3000,
-          });
+          toast.error("People is required");
           return;
         }
         toast.success("Task updated successfully!", {
-          description: "Your task has been updated",
           duration: 2000,
         });
       } else {
         const nameValue = formData.name?.trim() || formData.title?.trim();
         const descValue = formData.description?.trim() || formData.company?.trim();
-        
+
         if (!nameValue) {
-          toast.error("Name is required", {
-            description: "Please enter a valid name",
-            duration: 3000,
-          });
+          toast.error("Name is required");
           return;
         }
         if (!descValue) {
-          toast.error("Description is required", {
-            description: "Please enter a description",
-            duration: 3000,
-          });
+          toast.error("Description is required");
           return;
         }
         toast.success("Changes saved successfully!", {
-          description: "Your project has been updated",
           duration: 2000,
         });
       }
     }
-    
-    if (type === "filter" && data) { 
-      data.onApplyFilters(); 
-      onOpenChange(false); 
-      return; 
+
+    if (type === "filter" && data) {
+      data.onApplyFilters();
+      onOpenChange(false);
+      return;
     }
-    
+
     handleConfirm();
   };
 

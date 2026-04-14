@@ -163,7 +163,6 @@ export default function Activities() {
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">Activities</h1>
-          <p className="text-muted-foreground">Track your recent activities and updates</p>
         </div>
         {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={markAllAsRead}>

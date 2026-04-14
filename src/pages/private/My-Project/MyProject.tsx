@@ -232,7 +232,6 @@ export default function MyProject() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">My Project</h1>
-          <p className="text-muted-foreground">Your projects will appear here.</p>
         </div>
         <Button onClick={handleAddProject}>
           <Folder className="mr-2 h-4 w-4" />

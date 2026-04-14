@@ -83,7 +83,6 @@ export default function Companies() {
     <div className="space-y-6 p-4">
       <div>
         <h1 className="text-2xl font-bold">Companies</h1>
-        <p className="text-muted-foreground">Manage and view all companies</p>
       </div>
 
       {/* Search and Add Button */}

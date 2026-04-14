@@ -202,7 +202,6 @@ export default function Customer() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">Customers</h1>
-        <p className="text-muted-foreground">Manage and view all customers</p>
       </div>
 
       {/* Search and Invite Button */}

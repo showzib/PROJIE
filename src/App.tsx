@@ -10,8 +10,7 @@ import Customer from "./pages/private/Customer";
 import DsmLogs from "./pages/private/DsmLogs";
 import Companies from "./pages/private/Companies";
 import Team from "./pages/private/Team";
-import DevelopmentPage from "./pages/private/My-Project/developmentpage";
-import Invoice from "./pages/private/Invoice"; // 
+import Invoice from "./pages/private/Invoice"; 
 import { Payment } from "./pages/private/Payment";
 import Product from "./pages/private/Product";
 import BankAccountDetails from "./pages/private/BankAccountDetails";

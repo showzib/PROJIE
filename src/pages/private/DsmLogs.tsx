@@ -158,7 +158,6 @@ export default function DsmLogs() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">DSM Logs ({dsmLogs.length})</h1>
-        <p className="text-muted-foreground">View system and activity logs</p>
       </div>
 
       {/* Search Bar and Buttons */}

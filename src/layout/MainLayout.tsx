@@ -94,7 +94,6 @@ function FooterLogo() {
   );
 }
 
-// 🔥 Menu
 function MenuItems() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -107,7 +106,6 @@ function MenuItems() {
     { path: "/customer", label: "Customer", icon: UserCircle },
     { path: "/companies", label: "Companies", icon: Building2 },
     { path: "/team", label: "Team", icon: Users },
-    { path: "/invoice", label: "Invoice", icon: Receipt },
     { path: "/dsm-logs", label: "DSM Logs", icon: FileSearch },
     { path: "/payment", label: "Payment", icon: Wallet },
     { path: "/product", label: "Product", icon: FolderClosedIcon },
@@ -116,6 +114,7 @@ function MenuItems() {
     { path: "/converted-request", label: "Converted Request", icon: MailOpen },
     { path: "/converted-lead", label: "Converted Lead", icon: UserRoundX },
     { path: "/sales-team", label: "Sales Team", icon: UsersRound },
+    { path: "/invoice", label: "Invoice", icon: Receipt },
     { path: "/unit", label: "Unit", icon: Box },
     { path: "/email-smtp", label: "Email SMTP", icon: SendHorizonal },
     { path: "/crm-invoice", label: "CRM Invoice", icon: NotebookText },

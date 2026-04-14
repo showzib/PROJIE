@@ -101,7 +101,6 @@ export default function MyBoards() {
       <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">My Boards</h1>
-          <p className="text-muted-foreground">Your project boards will appear here.</p>
         </div>
         <Button onClick={() => setModalType("addProject")} size="sm">
           <Plus className="mr-2 h-4 w-4" />
